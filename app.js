@@ -1,5 +1,6 @@
 // 待辦清單資料的本地儲存鍵名稱
 const STORAGE_KEY = 'todo-app-items';
+const THEME_STORAGE_KEY = 'todo-app-theme';
 
 // 取得 DOM 元素
 const todoForm = document.getElementById('todoForm');
@@ -7,6 +8,13 @@ const todoInput = document.getElementById('todoInput');
 const todoList = document.getElementById('todoList');
 const emptyState = document.getElementById('emptyState');
 const remainingCount = document.getElementById('remainingCount');
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
+const themeLabel = document.getElementById('themeLabel');
+const filterButtons = document.querySelectorAll('.filter-button');
+const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
+let currentFilter = 'all';
+let hasManualTheme = false;
 
 // 從 localStorage 讀取資料，若沒有資料或格式異常，則回傳空陣列
 function loadTodos() {
@@ -44,23 +52,76 @@ function updateRemainingCount(todos) {
   remainingCount.textContent = `未完成: ${incompleteCount} 項`;
 }
 
+// 套用主題並更新切換按鈕；非手動模式會保留作業系統的 CSS 設定
+function applyTheme(theme, manual = false) {
+  hasManualTheme = manual;
+
+  if (manual) {
+    document.documentElement.dataset.theme = theme;
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, theme);
+    } catch (error) {
+      console.error('儲存主題設定失敗:', error);
+    }
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+
+  const isDark = theme === 'dark';
+  themeIcon.textContent = isDark ? '☀️' : '🌙';
+  themeLabel.textContent = isDark ? '淺色模式' : '深色模式';
+  themeToggle.setAttribute('aria-pressed', String(isDark));
+}
+
+// 優先使用手動選擇，否則依作業系統設定初始化
+function initializeTheme() {
+  let savedTheme = null;
+
+  try {
+    savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+  } catch (error) {
+    console.error('讀取主題設定失敗:', error);
+  }
+
+  if (savedTheme === 'light' || savedTheme === 'dark') {
+    applyTheme(savedTheme, true);
+    return;
+  }
+
+  applyTheme(systemTheme.matches ? 'dark' : 'light');
+}
+
+// 依目前篩選條件取得要顯示的待辦
+function getVisibleTodos(todos) {
+  if (currentFilter === 'active') {
+    return todos.filter((todo) => !todo.completed);
+  }
+  if (currentFilter === 'completed') {
+    return todos.filter((todo) => todo.completed);
+  }
+  return todos;
+}
+
+// 篩選結果為空時顯示對應提示
+function getEmptyMessage(todos) {
+  if (todos.length === 0) {
+    return '還沒有任何待辦事項，新增一個吧！';
+  }
+  if (currentFilter === 'active') {
+    return '太棒了，沒有未完成的事項！';
+  }
+  return '還沒有已完成的事項。';
+}
+
 // 渲染待辦列表
 function renderTodos() {
   const todos = loadTodos();
+  const visibleTodos = getVisibleTodos(todos);
 
   // 清空目前列表，避免重複渲染
   todoList.innerHTML = '';
 
-  // 若沒有待辦事項，顯示提示文字並停止後續渲染
-  if (todos.length === 0) {
-    emptyState.hidden = false;
-    updateRemainingCount(todos);
-    return;
-  }
-
-  emptyState.hidden = true;
-
-  todos.forEach((todo) => {
+  visibleTodos.forEach((todo) => {
     const listItem = document.createElement('li');
     listItem.className = `todo-item${todo.completed ? ' completed' : ''}`;
     listItem.dataset.id = String(todo.id);
@@ -86,7 +147,22 @@ function renderTodos() {
     todoList.appendChild(listItem);
   });
 
+  emptyState.hidden = visibleTodos.length > 0;
+  emptyState.textContent = getEmptyMessage(todos);
   updateRemainingCount(todos);
+}
+
+// 切換目前篩選並更新按鈕狀態
+function setFilter(filter) {
+  currentFilter = filter;
+
+  filterButtons.forEach((button) => {
+    const isActive = button.dataset.filter === filter;
+    button.classList.toggle('is-active', isActive);
+    button.setAttribute('aria-pressed', String(isActive));
+  });
+
+  renderTodos();
 }
 
 // 新增待辦事項
@@ -162,5 +238,24 @@ todoList.addEventListener('change', (event) => {
   }
 });
 
+// 篩選待辦事項
+filterButtons.forEach((button) => {
+  button.addEventListener('click', () => setFilter(button.dataset.filter));
+});
+
+// 切換主題並記住使用者的手動選擇
+themeToggle.addEventListener('click', () => {
+  const currentTheme = document.documentElement.dataset.theme || (systemTheme.matches ? 'dark' : 'light');
+  applyTheme(currentTheme === 'dark' ? 'light' : 'dark', true);
+});
+
+// 尚未手動選擇時，作業系統設定變更會同步更新按鈕
+systemTheme.addEventListener('change', (event) => {
+  if (!hasManualTheme) {
+    applyTheme(event.matches ? 'dark' : 'light');
+  }
+});
+
 // 第一次載入頁面時渲染
+initializeTheme();
 renderTodos();

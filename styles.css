@@ -1,5 +1,6 @@
 :root {
   --bg-color: #f3f6fb;
+  --bg-gradient-end: #edf2ff;
   --card-color: #ffffff;
   --primary-color: #4f46e5;
   --primary-soft: #eef2ff;
@@ -11,6 +12,46 @@
   --danger-soft: #fef2f2;
   --success-color: #10b981;
   --empty-color: #94a3b8;
+  --header-border: rgba(148, 163, 184, 0.15);
+  --focus-shadow: rgba(79, 70, 229, 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-color: #111827;
+    --bg-gradient-end: #172033;
+    --card-color: #1f2937;
+    --primary-color: #818cf8;
+    --primary-soft: #303a5b;
+    --text-color: #f3f4f6;
+    --muted-color: #a1a1aa;
+    --border-color: #3f4756;
+    --shadow-color: rgba(0, 0, 0, 0.32);
+    --danger-color: #f87171;
+    --danger-soft: #3b252c;
+    --success-color: #34d399;
+    --empty-color: #9ca3af;
+    --header-border: rgba(148, 163, 184, 0.22);
+    --focus-shadow: rgba(129, 140, 248, 0.2);
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg-color: #111827;
+  --bg-gradient-end: #172033;
+  --card-color: #1f2937;
+  --primary-color: #818cf8;
+  --primary-soft: #303a5b;
+  --text-color: #f3f4f6;
+  --muted-color: #a1a1aa;
+  --border-color: #3f4756;
+  --shadow-color: rgba(0, 0, 0, 0.32);
+  --danger-color: #f87171;
+  --danger-soft: #3b252c;
+  --success-color: #34d399;
+  --empty-color: #9ca3af;
+  --header-border: rgba(148, 163, 184, 0.22);
+  --focus-shadow: rgba(129, 140, 248, 0.2);
 }
 
 * {
@@ -23,7 +64,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(180deg, var(--bg-color), #edf2ff);
+  background: linear-gradient(180deg, var(--bg-color), var(--bg-gradient-end));
   font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;
   color: var(--text-color);
 }
@@ -42,6 +83,10 @@ body {
 }
 
 .todo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 26px 24px 18px;
   border-bottom: 1px solid var(--border-color);
 }
@@ -49,7 +94,25 @@ body {
 .todo-header h1 {
   margin: 0;
   font-size: clamp(1.6rem, 4vw, 2.2rem);
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--primary-soft);
+  color: var(--text-color);
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  border-color: var(--primary-color);
 }
 
 .todo-form {
@@ -60,17 +123,20 @@ body {
 
 .todo-form input {
   flex: 1;
+  min-width: 0;
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 12px 14px;
   font-size: 1rem;
+  color: var(--text-color);
+  background: var(--card-color);
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .todo-form input:focus {
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+  box-shadow: 0 0 0 3px var(--focus-shadow);
 }
 
 .todo-form button {
@@ -94,6 +160,34 @@ body {
   transform: translateY(0);
 }
 
+.todo-filters {
+  display: flex;
+  gap: 8px;
+  padding: 0 24px 16px;
+}
+
+.filter-button {
+  flex: 1;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--primary-soft);
+  color: var(--muted-color);
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.filter-button:hover {
+  color: var(--text-color);
+}
+
+.filter-button.is-active {
+  border-color: var(--primary-color);
+  background: var(--primary-color);
+  color: #fff;
+  font-weight: 600;
+}
+
 .todo-list {
   list-style: none;
   padding: 0 24px 8px;
@@ -112,7 +206,7 @@ body {
 
 .todo-item:hover {
   background: var(--primary-soft);
-  border-color: rgba(79, 70, 229, 0.12);
+  border-color: var(--header-border);
 }
 
 .todo-item input[type="checkbox"] {
@@ -174,6 +268,7 @@ body {
   }
 
   .todo-form,
+  .todo-filters,
   .todo-list,
   .empty-state,
   .todo-footer,
@@ -184,6 +279,10 @@ body {
 
   .todo-form {
     flex-direction: column;
+  }
+
+  .todo-header {
+    align-items: flex-start;
   }
 
   .todo-form button {
