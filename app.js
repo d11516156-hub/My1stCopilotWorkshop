@@ -8,6 +8,7 @@ const todoInput = document.getElementById('todoInput');
 const todoList = document.getElementById('todoList');
 const emptyState = document.getElementById('emptyState');
 const remainingCount = document.getElementById('remainingCount');
+const clearCompletedButton = document.getElementById('clearCompletedBtn');
 const themeToggle = document.getElementById('themeToggle');
 const themeIcon = document.getElementById('themeIcon');
 const themeLabel = document.getElementById('themeLabel');
@@ -150,6 +151,7 @@ function renderTodos() {
   emptyState.hidden = visibleTodos.length > 0;
   emptyState.textContent = getEmptyMessage(todos);
   updateRemainingCount(todos);
+  clearCompletedButton.hidden = !todos.some((todo) => todo.completed);
 }
 
 // 切換目前篩選並更新按鈕狀態
@@ -212,8 +214,24 @@ function deleteTodo(id) {
   renderTodos();
 }
 
+function clearCompletedTodos() {
+  const todos = loadTodos();
+  if (!todos.some((todo) => todo.completed)) {
+    return;
+  }
+
+    const confirmed = window.confirm('確定要刪除所有已完成的待辦事項嗎？此操作無法復原。');
+  if (!confirmed) {
+    return;
+  }
+
+  saveTodos(todos.filter((todo) => !todo.completed));
+  renderTodos();
+}
+
 // 事件綁定：新增表單提交
 todoForm.addEventListener('submit', addTodo);
+clearCompletedButton.addEventListener('click', clearCompletedTodos);
 
 // 事件委派：處理勾選與刪除動作
 todoList.addEventListener('click', (event) => {

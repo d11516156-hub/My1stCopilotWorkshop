@@ -256,10 +256,36 @@ body {
 }
 
 .todo-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
   border-top: 1px solid var(--border-color);
   padding: 16px 24px 22px;
   color: var(--muted-color);
   font-weight: 600;
+}
+
+.clear-completed-btn {
+  flex-shrink: 0;
+  border: 1px solid var(--danger-color);
+  border-radius: 10px;
+  background: var(--danger-soft);
+  color: var(--danger-color);
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.clear-completed-btn:hover {
+  opacity: 0.9;
+}
+
+.clear-completed-btn:focus-visible {
+  outline: 2px solid var(--danger-color);
+  outline-offset: 2px;
 }
 
 @media (max-width: 480px) {
