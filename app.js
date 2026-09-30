@@ -110,7 +110,7 @@ function getEmptyMessage(todos) {
   if (currentFilter === 'active') {
     return '太棒了，沒有未完成的事項！';
   }
-  return '還沒有已完成的事項。';
+    return '目前沒有已完成的事項；項目只是被篩選條件隱藏，仍可切換至「全部」查看。';
 }
 
 // 渲染待辦列表
